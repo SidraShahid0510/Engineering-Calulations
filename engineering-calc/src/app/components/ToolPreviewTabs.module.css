@@ -1,0 +1,149 @@
+.wrapper {
+  max-width: 1400px;
+  width: 100%;
+  margin: 40px auto;
+}
+
+.tabs {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 40px;
+  width: 100%;
+}
+
+.tabs button {
+  flex: 1; /* 🔥 THIS makes them equal width */
+  padding: 14px 18px;
+  border: none;
+  background: #f0f0f0;
+  cursor: pointer;
+  border-radius: 999px;
+  transition: background 0.3s ease;
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.tabs button:hover {
+  background: #ddd;
+}
+
+.active {
+  background: #0b5ed7 !important;
+  color: white;
+}
+
+/* Main layout: Left big image + Right text + 2 images */
+.layout {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 25px;
+
+  /* Smooth transition each time tab changes */
+  animation: fadeIn 0.35s ease;
+}
+.previewText {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1a1f25;
+  text-align: center;
+  margin: 100px auto 40px;
+  max-width: 900px;
+  line-height: 1.3;
+}
+
+/* Big image on left */
+.bigImg {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+/* Right side */
+.rightSide {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.textBox {
+  background: #f9fafc;
+  padding: 22px;
+  border-radius: 12px;
+}
+
+.title {
+  margin: 0 0 10px;
+  color: #1a1f25;
+}
+
+.description {
+  margin: 0 0 16px;
+  color: #1a1f25;
+  line-height: 1.5;
+  font-size: 0.9rem;
+  font-weight: 400;
+}
+
+.linkBtn {
+  display: inline-block;
+  padding: 10px 25px;
+  background: #0b5ed7;
+  color: white;
+
+  text-decoration: none;
+  width: fit-content;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* Two images under text (right side) */
+.smallImages {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.smallImg {
+  width: 100%;
+  height: 160px;
+  border-radius: 12px;
+  object-fit: cover;
+  transition: transform 0.25s ease;
+}
+
+.smallImg:hover {
+  transform: scale(1.03);
+}
+
+/* Fade animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .bigImage img {
+    max-height: 320px;
+  }
+
+  .smallImages {
+    grid-template-columns: 1fr;
+  }
+}

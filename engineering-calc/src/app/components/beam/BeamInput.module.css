@@ -1,0 +1,242 @@
+.card {
+  border: 1px solid #eef0f3;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-top: 14px;
+}
+
+.cardTitle {
+  margin: 0 0 8px 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid #eef0f3;
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.label {
+  font-size: 0.95rem;
+  color: #111827;
+}
+
+.control {
+  display: grid;
+  grid-template-columns: auto 170px auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.symbol {
+  font-style: italic;
+  color: #111827;
+  min-width: 44px;
+  text-align: right;
+}
+
+.input {
+  width: 170px;
+  padding: 9px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  outline: none;
+}
+
+.input:focus {
+  border-color: #2563eb;
+}
+
+.unit {
+  font-size: 0.9rem;
+  color: #111827;
+  min-width: 40px;
+}
+.select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+  margin: 10px 0 14px;
+}
+
+.loadFields {
+  display: grid;
+  gap: 12px;
+}
+
+.loadRow {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.loadSymbol {
+  font-style: italic;
+  min-width: 44px;
+}
+
+.loadInput {
+  padding: 9px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  outline: none;
+}
+
+.loadUnit {
+  min-width: 56px;
+  text-align: right;
+  font-size: 0.9rem;
+  color: #111827;
+}
+
+.calculateBtn {
+  margin-top: 16px;
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: none;
+  background: #0b5fff;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+.resultBox {
+  margin-top: 14px;
+}
+
+.hr {
+  border: none;
+  border-top: 1px solid #eef0f3;
+  margin: 12px 0;
+}
+
+.smallTitle {
+  margin: 0 0 8px 0;
+  font-size: 0.95rem;
+}
+
+.list {
+  margin: 0;
+  padding-left: 18px;
+}
+.inputError {
+  border-color: #ef4444;
+}
+
+.errorText {
+  margin: 6px 0 0 0;
+  font-size: 0.85rem;
+  color: #ef4444;
+  grid-column: 1 / -1; /* makes it span full width under row */
+}
+.calculateBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+/* Results rows (look like input fields but read-only) */
+.resultRow {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.resultSymbol {
+  font-style: italic;
+  min-width: 44px;
+}
+
+.resultInput {
+  padding: 9px 10px;
+  border: 1px solid #eef0f3;
+  background: #f9fafb;
+  border-radius: 6px;
+  outline: none;
+}
+
+.resultUnit {
+  min-width: 60px;
+  text-align: right;
+  font-size: 0.9rem;
+}
+
+/* Request point row (x input like screenshot) */
+.requestRow {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 0 12px;
+}
+
+.requestSymbol {
+  font-style: italic;
+  min-width: 44px;
+}
+
+.requestInput {
+  padding: 9px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  outline: none;
+  background: #fff7cc; /* light yellow like screenshot */
+}
+
+.requestUnit {
+  min-width: 60px;
+  text-align: right;
+  font-size: 0.9rem;
+}
+.radioGroup {
+  margin-top: 12px;
+}
+
+.radioLabel {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.radioOptions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.radioOption {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 14px;
+}
+/* Responsive: stack input under label */
+@media (max-width: 700px) {
+  .row {
+    grid-template-columns: 1fr;
+  }
+
+  .control {
+    grid-template-columns: auto 1fr auto;
+  }
+
+  .symbol {
+    text-align: left;
+    min-width: unset;
+  }
+
+  .input {
+    width: 100%;
+  }
+}
