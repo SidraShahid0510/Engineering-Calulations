@@ -8,6 +8,8 @@ export default function PropertyRow({
   unit,
   placeholder = "",
   error,
+  unitOptions = null,
+  onUnitChange = null,
 }) {
   return (
     <div className={styles.row}>
@@ -24,7 +26,21 @@ export default function PropertyRow({
           inputMode="decimal"
         />
 
-        <span className={styles.unit}>{unit}</span>
+        {unitOptions && onUnitChange ? (
+          <select
+            className={styles.unitSelect}
+            value={unit}
+            onChange={(e) => onUnitChange(e.target.value)}
+          >
+            {unitOptions.map((u) => (
+              <option key={u.value} value={u.value}>
+                {u.label}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <span className={styles.unit}>{unit}</span>
+        )}
       </div>
 
       {error ? <p className={styles.errorText}>{error}</p> : null}

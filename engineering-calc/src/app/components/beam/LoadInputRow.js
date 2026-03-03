@@ -6,6 +6,8 @@ export default function LoadInputRow({
   onChange,
   placeholder,
   unit,
+  unitOptions = null,
+  onUnitChange = null,
 }) {
   return (
     <div className={styles.loadRow}>
@@ -19,7 +21,21 @@ export default function LoadInputRow({
         inputMode="decimal"
       />
 
-      <span className={styles.loadUnit}>{unit}</span>
+      {unitOptions && onUnitChange ? (
+        <select
+          className={styles.unitSelect}
+          value={unit}
+          onChange={(e) => onUnitChange(e.target.value)}
+        >
+          {unitOptions.map((u) => (
+            <option key={u.value} value={u.value}>
+              {u.label}
+            </option>
+          ))}
+        </select>
+      ) : (
+        <span className={styles.unit}>{unit}</span>
+      )}
     </div>
   );
 }
