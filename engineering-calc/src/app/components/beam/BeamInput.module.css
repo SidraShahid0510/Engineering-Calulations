@@ -221,6 +221,53 @@
   align-items: center;
   font-size: 14px;
 }
+.unitSystemBox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+}
+
+.unitTitle {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.unitButtons {
+  display: flex;
+  gap: 8px;
+}
+
+.unitBtn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.activeBtn {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.unitSelect {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: transparent;
+  color: inherit;
+}
+.unitSelect {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  background: transparent;
+}
 /* Responsive: stack input under label */
 @media (max-width: 700px) {
   .row {

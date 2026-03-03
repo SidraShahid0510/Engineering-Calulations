@@ -113,7 +113,7 @@ export function calcTrapezoidalFull({ L, w1, w2 }) {
   const W = ((w1 + w2) / 2) * L;
 
   // Location of resultant load from left support
-  const xbar = (L * (2 * w1 + w2)) / (3 * (w1 + w2));
+  const xbar = (L * (w1 + 2 * w2)) / (3 * (w1 + w2));
 
   // Reactions
   const RB = (W * xbar) / L;
@@ -181,7 +181,7 @@ export function calcTrapezoidalAtX({ L, w1, w2, x }) {
   const W = ((w1 + w2) / 2) * L;
 
   // Resultant location from left (centroid)
-  const xbar = (L * (2 * w1 + w2)) / (3 * (w1 + w2));
+  const xbar = (L * (w1 + 2 * w2)) / (3 * (w1 + w2));
 
   // Reactions
   const RB = (W * xbar) / L;
@@ -273,4 +273,306 @@ export function calcTriangularDeflectionAtX({
       (7 * Math.pow(L, 3) * x) / 360);
 
   return ok({ dx });
+}
+// ===============================
+// Partial distributed load helpers
+// ===============================
+
+// Returns how much "load" is to the left of x (shear contribution)
+// and its moment about the section x (moment contribution).
+// Segment from a -> b with linearly varying intensity w1 -> w2
+function segmentContribution({ x, a, b, w1, w2 }) {
+  if (x <= a) return { Q: 0, M: 0 }; // nothing included yet
+
+  const Ls = b - a;
+  if (Ls <= 0) return { Q: 0, M: 0 };
+
+  const dw = w2 - w1;
+
+  // If x is beyond the segment, include full segment:
+  if (x >= b) {
+    const W = ((w1 + w2) / 2) * Ls;
+    const xbar = a + (Ls * (w1 + 2 * w2)) / (3 * (w1 + w2)); // centroid
+    // If w1 + w2 = 0, W = 0 and xbar is irrelevant
+    if (W === 0) return { Q: 0, M: 0 };
+    return { Q: W, M: W * (x - xbar) };
+  }
+
+  // x is inside the segment:
+  const u = x - a; // how far into the segment
+
+  // Q = ∫ w(t) dt from a to x
+  const Q = w1 * u + (dw * u * u) / (2 * Ls);
+
+  // M = ∫ w(t) * (x - t) dt from a to x
+  // derived closed-form:
+  const M = (w1 * u * u) / 2 + (dw * u * u * u) / (6 * Ls);
+
+  return { Q, M };
+}
+export function calcPartialUniform({ L, w, a, b }) {
+  if (!(L > 0)) return bad("L must be > 0");
+  if (!(w > 0)) return bad("w must be > 0");
+  if (!(a >= 0 && b <= L && b > a))
+    return bad("a and b must satisfy 0 ≤ a < b ≤ L");
+
+  const W = w * (b - a);
+  const xbar = (a + b) / 2;
+
+  const RB = (W * xbar) / L;
+  const RA = W - RB;
+
+  // Find Mmax by sampling (simple and safe)
+  let Mmax = -Infinity;
+  let xm = 0;
+
+  const steps = 400;
+  for (let i = 0; i <= steps; i++) {
+    const x = (L * i) / steps;
+
+    const seg = segmentContribution({ x, a, b, w1: w, w2: w });
+    const Vx = RA - seg.Q;
+    const Mx = RA * x - seg.M;
+
+    if (Mx > Mmax) {
+      Mmax = Mx;
+      xm = x;
+    }
+  }
+
+  return ok({ RA, RB, Mmax, xm });
+}
+
+export function calcPartialUniformAtX({ L, w, a, b, x }) {
+  if (!(L > 0)) return bad("L must be > 0");
+  if (!(a >= 0 && b <= L && b > a))
+    return bad("a and b must satisfy 0 ≤ a < b ≤ L");
+  if (!(x >= 0 && x <= L)) return bad("x must be between 0 and L");
+
+  const W = w * (b - a);
+  const xbar = (a + b) / 2;
+
+  const RB = (W * xbar) / L;
+  const RA = W - RB;
+
+  const seg = segmentContribution({ x, a, b, w1: w, w2: w });
+
+  const Vx = RA - seg.Q;
+  const Mx = RA * x - seg.M;
+
+  return ok({ Vx, Mx });
+}
+export function calcPartialTriangular({ L, w1, a, b }) {
+  if (!(L > 0)) return bad("L must be > 0");
+  if (!(w1 > 0)) return bad("w1 must be > 0");
+  if (!(a >= 0 && b <= L && b > a))
+    return bad("a and b must satisfy 0 ≤ a < b ≤ L");
+
+  // triangle from 0 at a to w1 at b:
+  const segLen = b - a;
+  const W = (w1 * segLen) / 2;
+  const xbar = a + (2 * segLen) / 3;
+
+  const RB = (W * xbar) / L;
+  const RA = W - RB;
+
+  let Mmax = -Infinity;
+  let xm = 0;
+
+  const steps = 400;
+  for (let i = 0; i <= steps; i++) {
+    const x = (L * i) / steps;
+
+    const seg = segmentContribution({ x, a, b, w1: 0, w2: w1 });
+    const Mx = RA * x - seg.M;
+
+    if (Mx > Mmax) {
+      Mmax = Mx;
+      xm = x;
+    }
+  }
+
+  return ok({ RA, RB, Mmax, xm });
+}
+
+export function calcPartialTriangularAtX({ L, w1, a, b, x }) {
+  if (!(L > 0)) return bad("L must be > 0");
+  if (!(a >= 0 && b <= L && b > a))
+    return bad("a and b must satisfy 0 ≤ a < b ≤ L");
+  if (!(x >= 0 && x <= L)) return bad("x must be between 0 and L");
+
+  const segLen = b - a;
+  const W = (w1 * segLen) / 2;
+  const xbar = a + (2 * segLen) / 3;
+
+  const RB = (W * xbar) / L;
+  const RA = W - RB;
+
+  const seg = segmentContribution({ x, a, b, w1: 0, w2: w1 });
+
+  const Vx = RA - seg.Q;
+  const Mx = RA * x - seg.M;
+
+  return ok({ Vx, Mx });
+}
+export function calcPartialTrapezoidal({ L, w1, w2, a, b }) {
+  if (!(L > 0)) return bad("L must be > 0");
+  if (!(w1 >= 0 && w2 >= 0)) return bad("w1 and w2 must be >= 0");
+  if (w1 === 0 && w2 === 0) return bad("w1 and w2 cannot both be 0");
+  if (!(a >= 0 && b <= L && b > a))
+    return bad("a and b must satisfy 0 ≤ a < b ≤ L");
+
+  const segLen = b - a;
+  const W = ((w1 + w2) / 2) * segLen;
+
+  // centroid of trapezoid load
+  const xbarRel = (segLen * (2 * w1 + w2)) / (3 * (w1 + w2));
+  const xbar = a + xbarRel;
+
+  const RB = (W * xbar) / L;
+  const RA = W - RB;
+
+  let Mmax = -Infinity;
+  let xm = 0;
+
+  const steps = 400;
+  for (let i = 0; i <= steps; i++) {
+    const x = (L * i) / steps;
+
+    const seg = segmentContribution({ x, a, b, w1, w2 });
+    const Mx = RA * x - seg.M;
+
+    if (Mx > Mmax) {
+      Mmax = Mx;
+      xm = x;
+    }
+  }
+
+  return ok({ RA, RB, Mmax, xm });
+}
+
+export function calcPartialTrapezoidalAtX({ L, w1, w2, a, b, x }) {
+  if (!(L > 0)) return bad("L must be > 0");
+  if (!(a >= 0 && b <= L && b > a))
+    return bad("a and b must satisfy 0 ≤ a < b ≤ L");
+  if (!(x >= 0 && x <= L)) return bad("x must be between 0 and L");
+
+  const segLen = b - a;
+  const W = ((w1 + w2) / 2) * segLen;
+  const xbarRel = (segLen * (2 * w1 + w2)) / (3 * (w1 + w2));
+  const xbar = a + xbarRel;
+
+  const RB = (W * xbar) / L;
+  const RA = W - RB;
+
+  const seg = segmentContribution({ x, a, b, w1, w2 });
+
+  const Vx = RA - seg.Q;
+  const Mx = RA * x - seg.M;
+
+  return ok({ Vx, Mx });
+}
+export function calcTrapezoidalSlab({ L, w, a, b }) {
+  if (!(L > 0)) return bad("L must be > 0");
+  if (!(w > 0)) return bad("w must be > 0");
+  if (!(a > 0)) return bad("a must be > 0");
+  if (!(b >= 0)) return bad("b must be >= 0");
+  if (Math.abs(L - (2 * a + b)) > 1e-9) {
+    return bad("For slab trapezoid, L must equal 2a + b");
+  }
+
+  // segments:
+  const seg1 = { a: 0, b: a, w1: 0, w2: w };
+  const seg2 = { a: a, b: a + b, w1: w, w2: w };
+  const seg3 = { a: a + b, b: L, w1: w, w2: 0 };
+
+  function totalWandMomentAboutA() {
+    const segs = [seg1, seg2, seg3];
+    let Wtot = 0;
+    let MtotA = 0; // moment about left support A
+
+    for (const s of segs) {
+      const Ls = s.b - s.a;
+      const W = ((s.w1 + s.w2) / 2) * Ls;
+      if (W === 0) continue;
+
+      const xbarRel = (Ls * (s.w1 + 2 * s.w2)) / (3 * (s.w1 + s.w2));
+      const xbar = s.a + xbarRel;
+
+      Wtot += W;
+      MtotA += W * xbar;
+    }
+    return { Wtot, MtotA };
+  }
+
+  const { Wtot, MtotA } = totalWandMomentAboutA();
+  const RB = MtotA / L;
+  const RA = Wtot - RB;
+
+  let Mmax = -Infinity;
+  let xm = 0;
+
+  const steps = 400;
+  for (let i = 0; i <= steps; i++) {
+    const x = (L * i) / steps;
+
+    const c1 = segmentContribution({ x, ...seg1 });
+    const c2 = segmentContribution({ x, ...seg2 });
+    const c3 = segmentContribution({ x, ...seg3 });
+
+    const Q = c1.Q + c2.Q + c3.Q;
+    const M = c1.M + c2.M + c3.M;
+
+    const Mx = RA * x - M;
+
+    if (Mx > Mmax) {
+      Mmax = Mx;
+      xm = x;
+    }
+  }
+
+  return ok({ RA, RB, Mmax, xm });
+}
+
+export function calcTrapezoidalSlabAtX({ L, w, a, b, x }) {
+  if (!(L > 0)) return bad("L must be > 0");
+  if (!(x >= 0 && x <= L)) return bad("x must be between 0 and L");
+  if (Math.abs(L - (2 * a + b)) > 1e-9) {
+    return bad("For slab trapezoid, L must equal 2a + b");
+  }
+
+  const seg1 = { a: 0, b: a, w1: 0, w2: w };
+  const seg2 = { a: a, b: a + b, w1: w, w2: w };
+  const seg3 = { a: a + b, b: L, w1: w, w2: 0 };
+
+  // total W and moment about A:
+  const segs = [seg1, seg2, seg3];
+  let Wtot = 0;
+  let MtotA = 0;
+  for (const s of segs) {
+    const Ls = s.b - s.a;
+    const W = ((s.w1 + s.w2) / 2) * Ls;
+    if (W === 0) continue;
+
+    const xbarRel = (Ls * (2 * s.w1 + s.w2)) / (3 * (s.w1 + s.w2));
+    const xbar = s.a + xbarRel;
+
+    Wtot += W;
+    MtotA += W * xbar;
+  }
+
+  const RB = MtotA / L;
+  const RA = Wtot - RB;
+
+  const c1 = segmentContribution({ x, ...seg1 });
+  const c2 = segmentContribution({ x, ...seg2 });
+  const c3 = segmentContribution({ x, ...seg3 });
+
+  const Q = c1.Q + c2.Q + c3.Q;
+  const M = c1.M + c2.M + c3.M;
+
+  const Vx = RA - Q;
+  const Mx = RA * x - M;
+
+  return ok({ Vx, Mx });
 }
